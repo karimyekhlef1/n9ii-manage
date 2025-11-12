@@ -10,7 +10,7 @@ export const useAuth = () => {
       try {
         // Using Axios instead of useFetch
         console.log("credentials",credentials)
-        const response = await axios.post('http://nqeyv2.runasp.net/api/Auth/login', 
+        const response = await axios.post('https://nqeyv2.runasp.net/api/Auth/login', 
           {...credentials,appType: "Admin"
 
            })
@@ -53,7 +53,7 @@ export const useAuth = () => {
       if (token.value) {
         try {
           // Using Axios for the auth check
-          const response = await axios.get('http://nqeyv2.runasp.net/api/Auth/login', {
+          const response = await axios.get('https://nqeyv2.runasp.net/api/Auth/login', {
             headers: {
               'Authorization': `Bearer ${token.value}`
             }
