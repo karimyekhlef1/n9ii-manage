@@ -36,11 +36,13 @@ const SelectedStatus = ref("")
 const statusOptions=[
 
   { text: 'Blocked', value: 'Blocked', color: 'red' },
-  { text: 'Active', value: 'Active', color: 'green' }
+  { text: 'Active', value: 'Active', color: 'green' },
+  { text: 'Processing	', value: 'Processing', color: '#fbc531' }
+
 ]
 const formFields=[
 
-  {label:"Status" ,name:"accountStatus", key:"accountStatus",type: "select" , required:true , options:["Active","Blocked"],cols:"12"}
+  {label:"Status" ,name:"accountStatus", key:"accountStatus",type: "select" , required:true , options:["Active","Blocked","Processing"],cols:"12"}
 ]
 
 onMounted(async () => {
@@ -104,7 +106,8 @@ const detailsFields=[
 ]
 const statusColors = ref({
   'Active': 'success',
-  'Blocked': 'error'
+  'Blocked': 'error',
+  'Processing': 'warning'
 })
 const actionButtons = ref({
   view: true,
