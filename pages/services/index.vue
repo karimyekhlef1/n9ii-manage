@@ -63,79 +63,79 @@
       />
 
       <!-- Service Requests Dialog -->
-      <v-dialog
-        v-model="openServiceRequestDialog"
-        max-width="800px"
-        persistent
-      >
-        <v-card>
-          <v-card-title class="d-flex justify-space-between align-center">
-            <span>Service Requests</span>
-            <v-btn
-              icon="mdi-close"
-              variant="text"
-              size="small"
-              @click="openServiceRequestDialog = false"
-     
-            />
-          </v-card-title>
-          <v-card-text>
-            <div v-if="servicesRequest.length === 0" class="text-center py-4">
-              <p class="text-h6 text-grey">No service requests found</p>
-            </div>
-            <v-list v-else>
-              <v-list-item
-                v-for="request in servicesRequest"
-                :key="request.id"
-  class="item-Request"
-         >
-              <!-- <v-card style="border: 1px; border-color: gray;"> -->
-                <v-list-item-title>{{ request.title || 'Service Request' }}</v-list-item-title>
-                <v-list-item-subtitle>{{ request.description || 'No description' }}</v-list-item-subtitle>
-                <v-list-item-subtitle>
-  👤 Provider: {{ request.providerUserId || 'Unknown' }}
-</v-list-item-subtitle>
-<v-btn 
-     color="primary"
-            variant="elevated"
-            class="action-btn new-service-btn"
-            prepend-icon="mdi-plus"
-            rounded="lg"
-            elevation="2"
-            @click="handelingService('create')"
- >
-  Change Service
-</v-btn>
-<v-btn 
-     color="primary"
-            variant="elevated"
-            class="action-btn new-service-btn"
-            prepend-icon="mdi-plus"
-            rounded="lg"
-            elevation="2"
-            @click="handelingService('create')"
- >
-  Confirm Change
-</v-btn>
+ <v-dialog
+    v-model="openServiceRequestDialog"
+    max-width="900px"
+    persistent
+    scrollable
+  >
+    <v-card>
+      <v-card-title class="d-flex justify-space-between align-center pa-4 bg-primary">
+        <div class="d-flex align-center gap-2">
+          <v-icon color="white">mdi-clipboard-list-outline</v-icon>
+          <span class="text-white">Service Requests</span>
+          <v-chip 
+            v-if="servicesRequest.length > 0"
+            color="white"
+            size="small"
+            variant="flat"
+          >
+            {{ servicesRequest.length }}
+          </v-chip>
+        </div>
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          color="white"
+          size="small"
+          @click="openServiceRequestDialog = false"
+        />
+      </v-card-title>
 
+      <v-card-text class="pa-4" style="max-height: 70vh;">
+        <!-- Empty State -->
+        <div 
+          v-if="servicesRequest.length === 0" 
+          class="text-center py-12"
+        >
+          <v-icon size="80" color="grey-lighten-1">
+            mdi-inbox-outline
+          </v-icon>
+          <p class="text-h6 text-grey mt-4">No service requests found</p>
+          <p class="text-body-2 text-grey-darken-1">
+            New requests will appear here
+          </p>
+        </div>
 
-                <!-- </v-card> -->
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn
-              color="primary"
-              variant="text"
-              @click="openServiceRequestDialog = false"
-              
-            >
-              Close
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+        <!-- Service Request Cards -->
+        <div v-else>
+          <ServiceRequestCard
+            v-for="request in servicesRequest"
+            :key="request.serviceRequestId"
+            :request="request"
+            :monster-url="monsterUrl"
+            @accepted="handleAccepted"
+            @refused="handleRefused"
+            @error="handleError"
+          />
+        </div>
+      </v-card-text>
+
+      <v-divider />
+
+      <v-card-actions class="pa-4">
+        <v-spacer />
+        <v-btn
+          color="primary"
+          variant="text"
+          prepend-icon="mdi-close"
+          @click="openServiceRequestDialog = false"
+        >
+          Close
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 
       <v-card class="services-container" variant="flat" v-if="services.length">
         <v-list class="services-list">

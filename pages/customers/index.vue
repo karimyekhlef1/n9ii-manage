@@ -68,9 +68,10 @@ const tableHeaders = ref([
 
   { title: 'Email', key: 'email' },
   { title: 'Phone', key: 'phoneNumber' },
-  { title: 'Sex', key: 'sex' },
   { title: 'Birth Date', key: 'birthDate' },
+  { title: 'Sex', key: 'sex' },
 
+  { title : 'createdAt',key: 'createdAt', label: 'Created Date', icon: 'mdi-calendar', type: 'date', section: 'additional' },
 
   // { title: 'Service Description', key: 'serviceDescription' },
   // { title: 'Location (City)', key: 'location.ville' },

@@ -48,6 +48,30 @@
           </v-avatar>
         </div>
       </template>
+<template #item.averageRating="{ item }">
+  <div class="d-flex align-center">
+    <v-rating
+      v-if="item.averageRating !== null && item.averageRating !== undefined"
+      :model-value="item.averageRating"
+      half-increments
+      readonly
+      size="18"
+      color="amber"
+      empty-icon="mdi-star-outline"
+      full-icon="mdi-star"
+      half-icon="mdi-star-half-full"
+    />
+    
+    <v-chip
+      v-else
+      size="small"
+      color="grey"
+      variant="flat"
+    >
+      No Rating
+    </v-chip>
+  </div>
+</template>
 
       <!-- Custom slot for selfie image -->
       <template v-slot:item.selfieImage="{ item }">
@@ -88,6 +112,61 @@
         </v-chip>
  
       </template>
+       <template v-slot:item.createdAt="{ item }">
+    <v-chip
+      color="primary"
+      size="small"
+      variant="outlined"
+      prepend-icon="mdi-calendar"
+    >
+      {{ $date.format(item.createdAt, 'medium') }}
+    </v-chip>
+  </template>
+  
+         <template v-slot:item.resolvedAt="{ item }">
+    <v-chip
+      color="primary"
+      size="small"
+      variant="outlined"
+      prepend-icon="mdi-calendar"
+    >
+      {{ $date.format(item.createdAt, 'larg') }}
+    </v-chip>
+  </template>
+           <template v-slot:item.birthDate="{ item }">
+    <v-chip
+      color="primary"
+      size="small"
+      variant="outlined"
+      prepend-icon="mdi-calendar"
+    >
+      {{ $date.format(item.birthDate, 'larg') }}
+    </v-chip>
+  </template>
+  
+<template v-slot:item.sex="{ item }">
+  <v-chip
+    v-if="item.sex"
+    :color="item.sex === 'Male' ? 'blue' : 'pink'"
+    size="small"
+    variant="tonal"
+    :prepend-icon="item.sex === 'Male' ? 'mdi-gender-male' : 'mdi-gender-female'"
+  >
+    {{ item.sex }}
+  </v-chip>
+
+  <v-chip
+    v-else
+    color="grey"
+    size="small"
+    variant="outlined"
+    prepend-icon="mdi-help-circle-outline"
+  >
+    Unknown
+  </v-chip>
+</template>
+
+
 
        <template v-slot:item.profileImage="{ item }">
         <div class="image-container">
@@ -122,6 +201,54 @@
           <div class="text-caption text-grey">{{ item.phone }}</div>
         </div>
       </template>
+<template #item.phoneNumber="{ item }">
+  <div class="d-flex align-center">
+    <v-chip
+      v-if="item.phoneNumber"
+      size="small"
+      color="green"
+      variant="tonal"
+      prepend-icon="mdi-phone"
+    >
+      {{ item.phoneNumber }}
+    </v-chip>
+
+    <v-chip
+      v-else
+      size="small"
+      color="green"
+      variant="flat"
+      prepend-icon="mdi-phone-off"
+    >
+      No Phone
+    </v-chip>
+  </div>
+</template>
+<template #item.email="{ item }">
+  <div class="d-flex align-center">
+    <v-chip
+      v-if="item.email"
+      size="small"
+      color="blue"
+      variant="tonal"
+      prepend-icon="mdi-email"
+    >
+      {{ item.email }}
+    </v-chip>
+
+    <v-chip
+      v-else
+      size="small"
+      color="grey"
+      variant="flat"
+      prepend-icon="mdi-email-off"
+    >
+      No Email
+    </v-chip>
+  </div>
+</template>
+
+
 
       <!-- Custom slot for actions -->
       <template v-slot:item.actions="{ item }">
@@ -489,7 +616,9 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { useDate } from 'vuetify'
 
+const $date = useDate()
 // Props
 const props = defineProps({
   // Data props
@@ -668,10 +797,11 @@ const imagePreviewTitle = ref('')
 const tableHeaders = computed(() => props.headers)
 
 const filteredItems = computed(() => {
+  console.log("formFields",props.formFields)
   let filtered = internalItems.value
 
   if (props.statusFilter) {
-    filtered = filtered.filter(item => item.status === props.statusFilter)
+    filtered = filtered.filter(item => item.status ||item.complaintStatus  === props.statusFilter)
   }
 
   if (props.typeFilter) {
@@ -800,6 +930,7 @@ const saveItem = () => {
       id: Date.now(),
       createdAt: new Date().toISOString().split('T')[0]
     }
+    console.log("newItem---->",newItem)
     internalItems.value.push(newItem)
     emit('save-item', { action: 'add', item: newItem })
   }

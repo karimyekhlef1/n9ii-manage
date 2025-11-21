@@ -48,7 +48,7 @@
       ></v-list-item>
       <v-list-item
         prepend-icon="mdi-account-wrench"
-        title="Customers"
+        title="Clients"
         value="customers"
         to="/customers"
         active-class="bg-primary/10 text-primary"

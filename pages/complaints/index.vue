@@ -1,38 +1,24 @@
 <template>
   <custom-page :loading="loading" :error="error" :onRefresh="refreshServices">
-    <custom-header-table title="complaints"/>
-    <custom-table  
-    :items="complaints"
-    :form-fields="formFields"
-        :headers="tableHeaders"
+    <custom-header-table 
+    title="complaints"
+     :isSearch="true" 
+  :isStatus="true" 
+      v-model:search="searchText"
+         
+      v-model:SelectedStatus="SelectedStatus" 
+      v-model:SelectedDate="SelectedStatus"
+      :status-options="statusOptions"
+        :status-colors="statusColors"
 
     />
-    <!-- <div class="services-page">
-      <div class="services-header">
-        <div class="services-title">
-          <h1>  complaints
-</h1>
-          <div class="services-count">{{ complaints.length }} services found</div>
-        </div>
-      </div>
+    <custom-table  
+    :items="filteredData"
+    :form-fields="formFields"
+    :headers="tableHeaders"
 
+    />
 
-
- 
-      <v-card class="services-container" variant="flat" v-if="complaints.length">
-        <v-list class="services-list">
-
-          <ComplaintCard
-                      v-for="complaint in complaints"
-
-           :key="complaint.complaintId"
-           :complaint="complaint" 
-           />
-    
-        </v-list>
-      </v-card>
-
-    </div> -->
   </custom-page>
 </template>
 
@@ -44,17 +30,34 @@ const complaints = ref([]);
 onMounted(async () => {
   await fetch("/Complaint");
   complaints.value = Complaints.value?.data || [];
-
-
 });
 
 const refreshServices = async () => {
   await fetch("/Complaint");
   complaints.value = Complaints.value?.data || [];
 };
+const statusColors = ref({
+  'Active': 'success',
+  'Blocked': 'error',
+  'Processing': 'warning'
+})
+const actionButtons = ref({
+  view: true,
+  edit: true,
+  delete: false
+})
+
+const searchText = ref("")
+const SelectedDate = ref("")
+const SelectedStatus = ref("")
+const statusOptions=[
+
+  { text: 'Dismissed', value: 'Dismissed', color: 'red' },
+  { text: 'Resolved', value: 'Resolved', color: 'green' },
+  { text: 'Pending	', value: 'Pending', color: '#fbc531' }
+
+]
 const tableHeaders = ref([
-
-
   { title: 'ID', key: 'complaintId' },
   { title: 'Reporter Id', key: 'reporterId' },
 
@@ -64,16 +67,26 @@ const tableHeaders = ref([
   { title: 'description', key: 'description' },
   { title: 'Status', key: 'complaintStatus' },
   { title: 'attachments', key: 'attachments' },
-  // { title: 'Location (City)', key: 'location.ville' },
-  // { title: 'Location (Wilaya)', key: 'location.wilaya' },
-  { title: 'resolvedAt', key: 'resolvedAt' , sortable: true, align: 'center' },
+  
+  { title: 'createdAt', key: 'createdAt' , sortable: true, align: 'center' },
 
-  //   { title: 'Created At', key: 'createdAt', sortable: true },
- 
-    { title: 'actions', key: 'actions', sortable: false },
+  { title: 'resolvedAt', key: 'resolvedAt' , sortable: true, align: 'center' ,type:"date" },
+  { title: 'actions', key: 'actions', sortable: false },
   
 ])
+const filteredData = computed(() => {
+  return complaints.value.filter((ele) => {
 
+    const search = searchText.value.toLowerCase();
+    const matchesSearch =
+      !search ||
+      ele.category.toLowerCase().includes(search) ||
+      ele.description.toLowerCase().includes(search) 
+  
+    const matchesStatus = !SelectedStatus.value || ele.complaintStatus === SelectedStatus.value;
+    return matchesSearch && matchesStatus
+  });
+});
 
 
 

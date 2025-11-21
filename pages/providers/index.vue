@@ -1,6 +1,11 @@
 <template>
     <custom-page  :loading="loading" :error="error" >
-  <CustomHeaderTable :isSearch="true" :isStatus="true" :isDate="true" title="Provider Page" v-model:search="searchText"
+  <CustomHeaderTable 
+  :isSearch="true" 
+  :isStatus="true" 
+  :isDate="true"
+   title="Provider Page"
+    v-model:search="searchText"
       v-model:SelectedStatus="SelectedStatus" 
       v-model:SelectedDate="SelectedStatus"
       :status-options="statusOptions"
@@ -13,8 +18,8 @@
         :status-colors="statusColors"
         :form-fields="formFields"
         :details-fields="detailsFields"
-    :show-actions="actionButtons"
-    @save-item="handleSave"
+        :show-actions="actionButtons"
+        @save-item="handleSave"
 
 
 
@@ -25,11 +30,18 @@
 </template>
 
 <script setup>
+import { ServiceCard } from "#components";
 import { ref, onMounted } from "vue";
 const { fetch, data: ProvidersData, loading, error } = useApi();
+const { fetch:services, data: servicesData, loading:servicesLoading, error:servicesError } = useApi();
+const { patch:update, data: provicerUpdated, loading:UpdatedLoading, error:UpdatedError } = useApi();
+
+
 const { patch:changeStauts,  loading:loadingChangeStauts, } = useApi();
 
 const AllProviders = ref([]);
+const AllServices = ref([]);
+
 const searchText = ref("")
 const SelectedDate = ref("")
 const SelectedStatus = ref("")
@@ -40,14 +52,33 @@ const statusOptions=[
   { text: 'Processing	', value: 'Processing', color: '#fbc531' }
 
 ]
-const formFields=[
+const formFields = computed(() => [
+  {
+    label: "Status",
+    name: "accountStatus",
+    key: "accountStatus",
+    type: "select",
+    required: true,
+    options: ["Active", "Blocked", "Processing"],
+    cols: "6",
+  },
+  {
+    label: "Service",
+    name: "serviceId",
+    key: "serviceId",
+    type: "select",
+    required: true,
+    cols: "6",
+    options: [0,...AllServices.value.map(service =>  service.serviceId)]
+  }
+]);
 
-  {label:"Status" ,name:"accountStatus", key:"accountStatus",type: "select" , required:true , options:["Active","Blocked","Processing"],cols:"12"}
-]
 
 onMounted(async () => {
   await fetch("/Provider/providers");
   AllProviders.value = ProvidersData.value?.data || [];
+  await services("/Service");
+  AllServices.value = servicesData.value?.data || [];
 });
 
 const filteredData = computed(() => {
@@ -74,11 +105,17 @@ const tableHeaders = ref([
   { title: 'Username', key: 'userName' },
   { title: 'First Name', key: 'firstName' },
   { title: 'Last Name', key: 'lastName' },
+  { title: 'Birth Date', key: 'birthDate' },
+  { title: 'Sex', key: 'sex' },
+
   { title: 'Email', key: 'email' },
   { title: 'Phone', key: 'phoneNumber' },
-  { title: 'Service Description', key: 'serviceDescription' },
+
+  // { title: 'Service Description', key: 'serviceDescription' },
   // { title: 'Location (City)', key: 'location.ville' },
   // { title: 'Location (Wilaya)', key: 'location.wilaya' },
+  { title : 'createdAt',key: 'createdAt', label: 'Created Date', icon: 'mdi-calendar', type: 'date', section: 'additional' },
+
   { title: 'Rating', key: 'averageRating' , sortable: true, align: 'center' },
 
   //   { title: 'Created At', key: 'createdAt', sortable: true },
@@ -115,8 +152,8 @@ const actionButtons = ref({
   delete: true
 })
 
-const handleSave=(data)=>{
- 
+const handleSave=async(data)=>{
+await update(`/Provider/${data.item.userId}`,data.item)
   if (data.item.accountStatus==="Blocked"){
     changeStauts(`/User/${data.item.userId}/block`)
 
