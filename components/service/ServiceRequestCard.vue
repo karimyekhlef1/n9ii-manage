@@ -8,14 +8,14 @@
     <v-card-title class="d-flex justify-space-between align-center pa-4">
       <div class="d-flex align-center gap-2">
         <v-icon color="primary" size="24">mdi-file-document-outline</v-icon>
-        <span class="text-h6">{{ request.requestName || 'Service Request' }}</span>
+        <span class="text-h6">{{ localRequest.requestName || 'Service Request' }}</span>
       </div>
       <v-chip 
-        :color="getStatusColor(request.serviceRequestStatus)" 
+        :color="getStatusColor(localRequest.serviceRequestStatus)" 
         size="small"
         variant="flat"
       >
-        {{ request.serviceRequestStatus }}
+        {{ localRequest.serviceRequestStatus }}
       </v-chip>
     </v-card-title>
 
@@ -26,7 +26,7 @@
       <!-- Description -->
       <div class="mb-4">
         <div class="text-subtitle-2 text-grey-darken-1 mb-1">Description</div>
-        <p class="text-body-2">{{ request.description || 'No description provided' }}</p>
+        <p class="text-body-2">{{ localRequest.description || 'No description provided' }}</p>
       </div>
 
       <!-- Provider Information -->
@@ -36,8 +36,8 @@
           <!-- Avatar -->
           <v-avatar size="48" color="grey-lighten-2">
             <v-img 
-              v-if="request.provider?.profileImage?.imagePath"
-              :src="request.provider.profileImage.imagePath"
+              v-if="localRequest.provider?.profileImage?.imagePath"
+              :src="localRequest.provider.profileImage.imagePath"
               :alt="getProviderName()"
               cover
             />
@@ -51,7 +51,7 @@
                 {{ getProviderName() }}
               </span>
               <v-icon 
-                v-if="request.provider?.isIdentityVerified"
+                v-if="localRequest.provider?.isIdentityVerified"
                 color="primary"
                 size="18"
                 title="Verified Provider"
@@ -63,19 +63,19 @@
             <div class="d-flex align-center gap-3 mt-1">
               <!-- Username -->
               <span class="text-caption text-grey-darken-1">
-                @{{ request.provider?.userName || 'Unknown' }}
+                @{{ localRequest.provider?.userName || 'Unknown' }}
               </span>
               
               <!-- Rating -->
-              <div v-if="request.provider?.averageRating" class="d-flex align-center gap-1">
+              <div v-if="localRequest.provider?.averageRating" class="d-flex align-center gap-1">
                 <v-icon color="amber" size="16">mdi-star</v-icon>
-                <span class="text-caption">{{ request.provider.averageRating.toFixed(1) }}</span>
+                <span class="text-caption">{{ localRequest.provider.averageRating.toFixed(1) }}</span>
               </div>
 
               <!-- Contact -->
-              <div v-if="request.provider?.phoneNumber" class="d-flex align-center gap-1">
+              <div v-if="localRequest.provider?.phoneNumber" class="d-flex align-center gap-1">
                 <v-icon color="grey-darken-1" size="16">mdi-phone</v-icon>
-                <span class="text-caption">{{ request.provider.phoneNumber }}</span>
+                <span class="text-caption">{{ localRequest.provider.phoneNumber }}</span>
               </div>
             </div>
           </div>
@@ -85,8 +85,11 @@
 
     <v-divider />
 
-    <!-- Action Buttons -->
-    <v-card-actions class="pa-4 d-flex gap-2">
+    <!-- Action Buttons - Only show for Pending status -->
+    <v-card-actions 
+      v-if="localRequest.serviceRequestStatus === 'Pending'" 
+      class="pa-4 d-flex gap-2"
+    >
       <v-btn
         color="success"
         variant="flat"
@@ -113,11 +116,58 @@
         Refuse Request
       </v-btn>
     </v-card-actions>
+
+    <!-- Status Message for Accepted/Refused -->
+    <v-card-actions 
+      v-else-if="localRequest.serviceRequestStatus === 'Accepted'" 
+      class="pa-4"
+    >
+      <v-alert
+        type="success"
+        variant="tonal"
+        class="w-100"
+        density="compact"
+        icon="mdi-check-circle"
+      >
+        This request has been accepted
+      </v-alert>
+    </v-card-actions>
+
+    <v-card-actions 
+      v-else-if="localRequest.serviceRequestStatus === 'Refused'" 
+      class="pa-4"
+    >
+      <v-alert
+        type="error"
+        variant="tonal"
+        class="w-100"
+        density="compact"
+        icon="mdi-close-circle"
+      >
+        This request has been refused
+      </v-alert>
+    </v-card-actions>
+
+    <!-- Completed Status -->
+    <v-card-actions 
+      v-else-if="localRequest.serviceRequestStatus === 'Completed'" 
+      class="pa-4"
+    >
+      <v-alert
+        type="info"
+        variant="tonal"
+        class="w-100"
+        density="compact"
+        icon="mdi-checkbox-marked-circle"
+      >
+        This request has been completed
+      </v-alert>
+    </v-card-actions>
   </v-card>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
   request: {
@@ -128,16 +178,24 @@ const props = defineProps({
 
 const emit = defineEmits(['accepted', 'refused', 'error'])
 
+// Local state for the request
+const localRequest = ref({ ...props.request })
+
+// Watch for external changes to props
+watch(() => props.request, (newRequest) => {
+  localRequest.value = { ...newRequest }
+}, { deep: true })
+
 // API composables for accept and refuse
 const { 
-  fetch: fetchAccept, 
+  patch: fetchAccept, 
   data: dataAccept, 
   loading: loadingAccept, 
   error: errorAccept 
 } = useApi()
 
 const { 
-  fetch: fetchRefuse, 
+  patch: fetchRefuse, 
   data: dataRefuse, 
   loading: loadingRefuse, 
   error: errorRefuse 
@@ -147,7 +205,7 @@ const {
 const isLoading = computed(() => loadingAccept.value || loadingRefuse.value)
 
 const getProviderName = () => {
-  const { provider } = props.request
+  const { provider } = localRequest.value
   if (!provider) return 'Unknown Provider'
   
   const firstName = provider.firstName || ''
@@ -168,7 +226,7 @@ const getStatusColor = (status) => {
 const handleAccept = async () => {
   try {
     await fetchAccept(
-      `/ServiceRequest/accept?id=${props.request.serviceRequestId}`,
+      `/ServiceRequest/accept?id=${localRequest.value.serviceRequestId}`,
       { method: 'POST' }
     )
     
@@ -176,7 +234,10 @@ const handleAccept = async () => {
       throw new Error('Failed to accept request')
     }
     
-    emit('accepted', props.request.serviceRequestId)
+    // Update local state immediately
+    localRequest.value.serviceRequestStatus = 'Accepted'
+    
+    emit('accepted', localRequest.value.serviceRequestId)
   } catch (error) {
     console.error('Error accepting request:', error)
     emit('error', { action: 'accept', error })
@@ -186,7 +247,7 @@ const handleAccept = async () => {
 const handleRefuse = async () => {
   try {
     await fetchRefuse(
-      `/ServiceRequest/refuse?id=${props.request.serviceRequestId}`,
+      `/ServiceRequest/refuse?id=${localRequest.value.serviceRequestId}`,
       { method: 'POST' }
     )
     
@@ -194,7 +255,10 @@ const handleRefuse = async () => {
       throw new Error('Failed to refuse request')
     }
     
-    emit('refused', props.request.serviceRequestId)
+    // Update local state immediately
+    localRequest.value.serviceRequestStatus = 'Refused'
+    
+    emit('refused', localRequest.value.serviceRequestId)
   } catch (error) {
     console.error('Error refusing request:', error)
     emit('error', { action: 'refuse', error })

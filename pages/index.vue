@@ -1,5 +1,8 @@
 <template>
+    <custom-page :loading="false">
+  
   <v-container fluid class="pa-6 bg-grey-lighten-4">
+
     <!-- Header with Actions -->
     <v-row class="mb-6">
       <v-col cols="12" md="8">
@@ -366,6 +369,8 @@
       </v-col>
     </v-row>
   </v-container>
+</custom-page>
+  
 </template>
 
 <script setup>

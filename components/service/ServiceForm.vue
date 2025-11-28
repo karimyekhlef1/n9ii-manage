@@ -200,7 +200,7 @@
 <script setup>
 import { ref, reactive, watch, onMounted } from 'vue';
 
-const { post, put, loading, error } = useApi();
+const { post, put, loading, error,patch } = useApi();
 const { showSuccess, showError } = useToast();
 const form = ref(null);
 const fileInput = ref(null);
@@ -289,11 +289,18 @@ const editService = async () => {
     form.append('Namefr', formData.nameFr);
     form.append('NameAr', formData.nameAr);
     form.append('image',  formData.imageFile); 
+    console.log("form",form)
 
-    const result = await put(`/Service/${props.initialData.serviceId}`, form);
+    const result = await patch(`/Service/${props.initialData.serviceId}`, form);
     if (result) {
-      emit('on-action',{...formData, serviceId:props.initialData.serviceId},'edit');
-      // emit('submit', { action: 'edit', data: result });
+      console.log("formData",formData)
+emit('on-action', {
+        ...formData,
+        image: {
+          imagePath: formData.imagePreview  // or result.image?.imagePath if returned from API
+        },
+        serviceId: props.initialData.serviceId
+      }, 'edit');      // emit('submit', { action: 'edit', data: result });
       showSuccess("Edited successfully");
       closeDialog();
     }
