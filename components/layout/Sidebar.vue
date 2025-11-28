@@ -6,7 +6,7 @@
       class="flex-shrink-0"
       dark
       elevation="1"
-    >    <v-toolbar-title class="">N9ii</v-toolbar-title>
+    >    <v-toolbar-title class="">NJIIK</v-toolbar-title>
      
       
       <v-spacer></v-spacer>
