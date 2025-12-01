@@ -1,6 +1,6 @@
 <template>
   <template class="d-flex">
-  <v-container fluid width="50%">
+  <v-container fluid width="100%">
     <!-- Loading State -->
     <template v-if="loading">
       <v-card
@@ -74,18 +74,7 @@
       </v-row>
     </template>
   </v-container>
-  <v-container  width="50%" >
-  
-    <massages-screen v-if="senderId" :receiver-id="senderId" sender-id="1" />
-          <v-row v-else justify="center" class="mt-10">
-        <v-col cols="12" class="text-center">
-          <v-icon size="64" color="grey-lighten-1">
-            mdi-message-outline
-          </v-icon>
-          <p class="text-h6 text-grey mt-4">No messages yet</p>
-        </v-col>
-      </v-row>
-  </v-container>
+
   </template>
 </template>
 
@@ -130,20 +119,21 @@ console.log("response----",response.data)
 };
 
 const handleMessagePress = (item: UserItem) => {
-  // router.push(`/messages/${item.userId}`);
-  senderId.value=item.userId
+  router.push(`/messages/${item.userId}`)
+  // senderId.value=item.userId
 
 };
 
 const handleBackPress = () => {
-  router.push('/tabs');
+  router.push('/');
 };
 
 onMounted(() => {
   fetchMessages();
-  
-  // Handle back button for mobile
-  window.addEventListener('popstate', handleBackPress);
+    window.addEventListener('popstate', handleBackPress);
+});
+watch(() => senderId, () => {
+  fetchMessages();
 });
 </script>
 

@@ -1,6 +1,36 @@
 <template>
   <v-card class="chat-container">
-    <v-alert
+  <v-card-title>
+<v-icon
+  icon="mdi-arrow-left"
+  size="28"
+  class="cursor-pointer"
+  @click="$router.push('/messages')"
+></v-icon>
+            <v-card-text class="d-flex align-center pa-3">
+          <!-- Avatar -->
+          <v-avatar size="48" class="mr-3">
+            <v-img
+              :src="receiver?.profileImage.imagePath "
+              :alt="receiver?.userName"
+            />
+          </v-avatar>
+
+          <!-- Message Details -->
+          <div class="flex-grow-1">
+            <div class="d-flex justify-space-between align-center mb-1">
+              <span class="text-h6 font-weight-medium text-truncate">
+                {{ receiver?.userName }}
+              </span>
+
+            </div>
+            <div class="text-body-2 text-grey-darken-1">
+              {{ receiver?.phoneNumber }}
+            </div>
+          </div>
+        </v-card-text>
+  </v-card-title>   
+   <v-alert
       v-if="messagesError"
       type="error"
       class="ma-4"
@@ -150,6 +180,7 @@ interface Message {
 interface Props {
   receiverId: string | number;
   senderId: string | number;
+  receiverData:any
 }
 
 const props = defineProps<Props>();
@@ -161,11 +192,14 @@ const messageContainer = ref<HTMLElement | null>(null);
 const messagesError = ref(false);
 const messagesLoading = ref(false);
 const sendLoading = ref(false);
+const receiver = ref<any>(null)
 
 // Convert props to numbers
 const currentUserId = computed(() => Number(props.senderId));
 const otherUserId = computed(() => Number(props.receiverId));
-
+const receiverData = computed(() => props.receiverData);
+console.log("receiverData",receiverData)
+// receiver.value= receiverData
 // Fetch messages function (replace with your API)
 const getMessages = async () => {
   try {
@@ -176,12 +210,18 @@ const getMessages = async () => {
     const response = await fetch('/Message/otherUserId', {
       params: { otherUserId: props.receiverId }
     });
-    console.log(response);
+    console.log(response.data[0].senderId)
+    console.log(response.data[0].senderId)
+
+    if(props.receiverId == response.data[0].senderId){
+           receiver.value= response.data[0].sender
+    }
+        if(props.receiverId == response.data[0].recieverId){
+           receiver.value= response.data[0].receiver
+    }
 
     localMessages.value = response.data;
   } catch (error) {
-    console.error('Error fetching messages:', error);
-    messagesError.value = true;
   } finally {
     messagesLoading.value = false;
   }
@@ -291,7 +331,17 @@ watch(() => localMessages.value.length, () => {
   scrollToBottom();
 });
 
-// Initial load
+watch(
+  () => props.receiverData,
+  (newValue) => {
+    if (newValue) {
+      receiver.value = newValue;
+      console.log("Updated receiver:", receiver.value);
+    }
+  },
+  { immediate: true } // Run immediately on mount
+);
+
 onMounted(() => {
   getMessages();
 });

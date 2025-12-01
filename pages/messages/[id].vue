@@ -1,82 +1,7 @@
 <template>
-  <template class="d-flex">
-  <v-container fluid width="50%">
-    <!-- Loading State -->
-    <template v-if="loading">
-      <v-card
-        v-for="i in 6"
-        :key="`skeleton-${i}`"
-        class="mb-3"
-        elevation="1"
-      >
-        <v-card-text class="d-flex align-center">
-          <v-skeleton-loader
-            type="avatar"
-            class="mr-3"
-          />
-          <div class="flex-grow-1">
-            <v-skeleton-loader type="heading" class="mb-2" />
-            <v-skeleton-loader type="text" />
-          </div>
-        </v-card-text>
-      </v-card>
-    </template>
 
-    <!-- Messages List -->
-    <template v-else>
-      <v-card
-        v-for="item in data?.data"
-        :key="item.userId"
-        class="mb-3"
-        elevation="1"
-        hover
-        @click="handleMessagePress(item)"
-      >
-        <v-card-text class="d-flex align-center pa-3">
-          <!-- Avatar -->
-          <v-avatar size="48" class="mr-3">
-            <v-img
-              :src="item.imagePath || 'https://karim-dev.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fkarim.7b43a71d.jpg&w=640&q=95'"
-              :alt="item.userName"
-            />
-          </v-avatar>
-
-          <!-- Message Details -->
-          <div class="flex-grow-1">
-            <div class="d-flex justify-space-between align-center mb-1">
-              <span class="text-h6 font-weight-medium text-truncate">
-                {{ item.userName }}
-              </span>
-              <v-chip
-                v-if="item.unreadCount > 0"
-                color="error"
-                size="small"
-                class="ml-2"
-              >
-                {{ item.unreadCount }}
-              </v-chip>
-            </div>
-            <div class="text-body-2 text-grey-darken-1">
-              {{ item.phoneNumber }}
-            </div>
-          </div>
-        </v-card-text>
-      </v-card>
-
-      <!-- Empty State -->
-      <v-row v-if="!data?.data?.length" justify="center" class="mt-10">
-        <v-col cols="12" class="text-center">
-          <v-icon size="64" color="grey-lighten-1">
-            mdi-message-outline
-          </v-icon>
-          <p class="text-h6 text-grey mt-4">No messages yet</p>
-        </v-col>
-      </v-row>
-    </template>
-  </v-container>
-  <v-container  width="50%" >
   
-    <massages-screen v-if="senderId" :receiver-id="senderId" sender-id="1" />
+    <massages-screen v-if="senderId" :receiver-id="senderId" sender-id="1" :receiverData="reciverData"/>
           <v-row v-else justify="center" class="mt-10">
         <v-col cols="12" class="text-center">
           <v-icon size="64" color="grey-lighten-1">
@@ -85,8 +10,7 @@
           <p class="text-h6 text-grey mt-4">No messages yet</p>
         </v-col>
       </v-row>
-  </v-container>
-  </template>
+
 </template>
 
 <script setup lang="ts">
@@ -111,6 +35,7 @@ const router = useRouter();
 const data = ref<ApiResponse | null>(null);
 const loading = ref(true);
 const senderId = ref<null | number>(null)
+const reciverData=ref<any>(null)
 const error = ref<Error | null>(null);
 const {fetch}=useApi()
 const route = useRoute()
@@ -129,17 +54,14 @@ const fetchMessages = async () => {
   }
 };
 
-const handleMessagePress = (item: UserItem) => {
-  // router.push(`/messages/${item.userId}`);
-  senderId.value=item.userId
-
-};
-
 const handleBackPress = () => {
-  router.push('/tabs');
+  router.push('/message');
 };
 
 onMounted(() => {
+const item = JSON.parse(route.query.data || '{}');
+reciverData.value =  item
+console.log("````````````",reciverData.value)
   senderId.value=route.params.id
   fetchMessages();
   

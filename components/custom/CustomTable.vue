@@ -889,9 +889,14 @@ const editItem = async (item) => {
   emit('edit-item', item)
 }
 const handelOpeMassage = async (item) => {
-  router.push(`/messages/${item.userId}`);
-
+  router.push({
+    path: `/messages/${item.userId}`,
+    query: { 
+      data: JSON.stringify(item) 
+    }
+  });
 }
+
 
 const editFromDetails = () => {
   closeDetailsDialog()
