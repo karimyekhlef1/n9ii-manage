@@ -260,6 +260,14 @@
       variant="text"
       @click="viewItem(item)"
     />
+            <v-btn
+      v-if="showActions.massage"
+      icon="mdi-email"
+      size="small"
+      variant="text"
+      color="primary"
+      @click="handelOpeMassage(item)"
+    />
     <v-btn
       v-if="showActions.edit"
       icon="mdi-pencil"
@@ -275,6 +283,7 @@
       color="error"
       @click="deleteItem(item)"
     />
+
   </div>
       </template>
 
@@ -709,7 +718,8 @@ const props = defineProps({
     default: () => ({
       view: true,
       edit: true,
-      delete: true
+      delete: true,
+      massage:true
     })
   },
   
@@ -792,10 +802,11 @@ const editedItem = ref({})
 const viewedItem = ref({})
 const imagePreviewSrc = ref('')
 const imagePreviewTitle = ref('')
+import { useRouter } from 'vue-router'
 
 // Computed properties
 const tableHeaders = computed(() => props.headers)
-
+const router = useRouter();
 const filteredItems = computed(() => {
   console.log("formFields",props.formFields)
   let filtered = internalItems.value
@@ -872,12 +883,14 @@ const viewItem = (item) => {
 
 const editItem = async (item) => {
   editedIndex.value = internalItems.value.indexOf(item)
-  // Deep copy the item to avoid modifying the original
   editedItem.value = JSON.parse(JSON.stringify(item))
-  
   await nextTick() // Wait for Vue to update the DOM
   dialog.value = true
   emit('edit-item', item)
+}
+const handelOpeMassage = async (item) => {
+  router.push(`/messages/${item.userId}`);
+
 }
 
 const editFromDetails = () => {

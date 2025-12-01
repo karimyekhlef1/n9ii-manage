@@ -126,6 +126,8 @@ const tableHeaders = ref([
   { title: 'ID Document', key: 'identityPiece', sortable: false },
   { title: 'Selfie', key: 'selfieImage', sortable: false },
   { title: 'Status', key: 'accountStatus' , sortable: true, align: 'center' },
+  { title: 'IA Status Props ', key: 'isIdentityVerified' , sortable: true, align: 'center' },
+
 
     { title: 'actions', key: 'actions', sortable: false },
   
@@ -149,7 +151,8 @@ const statusColors = ref({
 const actionButtons = ref({
   view: true,
   edit: true,
-  delete: true
+  delete: true,
+  massage:true
 })
 
 const handleSave=async(data)=>{

@@ -13,6 +13,7 @@ export function useApi() {
     return {
       ...options,
       headers: {
+         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
         ...(options.headers || {})
       }

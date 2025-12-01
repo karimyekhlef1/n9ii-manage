@@ -100,14 +100,15 @@
         <v-list-item-subtitle class="text-caption">{{ user.role }}</v-list-item-subtitle>
       </v-list-item>
       
-      <v-list-item
-        prepend-icon="mdi-cog"
-        title="Settings"
-        value="settings"
-        to="/settings"
-        active-class="bg-primary/10 text-primary"
-        class="rounded-md mx-2"
-      ></v-list-item>
+<v-list-item
+  prepend-icon="mdi-email"
+  title="messages"
+  value="messages"
+  to="/messages"
+  active-class="bg-primary/10 text-primary"
+  class="rounded-md mx-2"
+></v-list-item>
+
       <v-list-item
         prepend-icon="mdi-logout"
         title="Logout"
